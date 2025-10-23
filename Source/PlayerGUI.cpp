@@ -2,7 +2,7 @@
 
 PlayerGUI::PlayerGUI() {
     // Add buttons
-    for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton , &startButton , &endButton})
+    for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton , &startButton , &endButton ,&muteUnmuteButton })
     {
         btn->addListener(this);
         addAndMakeVisible(btn);
@@ -14,12 +14,15 @@ PlayerGUI::PlayerGUI() {
     volumeSlider.addListener(this);
     addAndMakeVisible(volumeSlider);
     addAndMakeVisible(playPauseButton);
-	addAndMakeVisible(startButton);
+    addAndMakeVisible(startButton);
     addAndMakeVisible(endButton);
+    addAndMakeVisible(muteUnmuteButton);
     playPauseButton.addListener(this);
     startButton.addListener(this);
     endButton.addListener(this);
+    muteUnmuteButton.addListener(this);
 }
+    
 void PlayerGUI::resized()
 {
     int y = 20;
@@ -27,10 +30,12 @@ void PlayerGUI::resized()
     playPauseButton.setBounds(120, y, 60, 40);
     startButton.setBounds(190, y, 60, 40);
     endButton.setBounds(260, y, 60, 40);
-    restartButton.setBounds(330, y, 80, 40);
-    stopButton.setBounds(420, y, 80, 40);
+    restartButton.setBounds(330, y, 60, 40);
+    stopButton.setBounds(470, y, 60, 40);
+    muteUnmuteButton.setBounds(400, y, 60, 40);
     /*prevButton.setBounds(340, y, 80, 40);
     nextButton.setBounds(440, y, 80, 40);*/
+
 
     volumeSlider.setBounds(20, 100, getWidth() - 40, 30);
 }
@@ -65,6 +70,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 
         fileChooser = std::make_unique<juce::FileChooser>(
             "Select an audio file...",
+
             juce::File{},
             "*.wav;*.mp3");
 
@@ -114,6 +120,20 @@ void PlayerGUI::buttonClicked(juce::Button* button)
     {
         playerAudio.stop();
         playerAudio.setPosition(0.0);
+    }
+    if (button == &muteUnmuteButton) {
+        if (!isMuted) {
+            previousVolume = (float)volumeSlider.getValue();
+            playerAudio.setGain(0.0f);
+            muteUnmuteButton.setButtonText("Unmute");
+            isMuted = true;
+
+        }
+        else {
+            playerAudio.setGain(previousVolume);
+            muteUnmuteButton.setButtonText("Mute");
+            isMuted = false;
+        }
     }
 
 }
