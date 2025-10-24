@@ -7,7 +7,9 @@ using namespace std;
 
 class PlayerGUI : public juce::Component,
 	public juce::Button::Listener,
-	public juce::Slider::Listener
+	public juce::Slider::Listener,
+	public juce::Timer
+
 {
 public:
 	PlayerGUI();
@@ -29,9 +31,10 @@ private:
 	juce::TextButton startButton{"start"};
 	juce::TextButton endButton{"end"};
 	juce::TextButton muteUnmuteButton{ "Mute / Unmute" }; 
-
+	juce::TextButton loopButton {" Loop "};
 
 	bool isPlaying = false;
+	bool isLooping = false;
 	
 	juce::Slider volumeSlider;
 	std::unique_ptr <juce::FileChooser> fileChooser;
@@ -40,5 +43,6 @@ private:
 	bool isMuted = false;
 	void buttonClicked(juce::Button* button) override;
 	void sliderValueChanged(juce::Slider* slider) override;
+	void timerCallback() override;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
