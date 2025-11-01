@@ -3,9 +3,10 @@
 PlayerAudio::PlayerAudio()
 {
     formatManager.registerBasicFormats();
+	transportSource.addChangeListener(this);
 }
 PlayerAudio::~PlayerAudio() {
-
+	transportSource.removeChangeListener(this);
 }
 void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
@@ -77,4 +78,43 @@ double PlayerAudio::getPosition() const {
 }
 double PlayerAudio::getLength() const {
     return transportSource.getLengthInSeconds();
+}
+void PlayerAudio::loadPlaylist(const juce::Array<juce::File>& files)
+{
+    playlist = files;
+
+    if (playlist.size() > 0)
+    {
+        currentIndex = 0;
+        loadFile(playlist[currentIndex]);
+        start();
+    }
+}
+
+void PlayerAudio::playNext()
+{
+    if (playlist.size() == 0) return;
+
+    currentIndex = (currentIndex + 1) % playlist.size();
+    loadFile(playlist[currentIndex]);
+    start();
+}
+
+void PlayerAudio::playPrevious()
+{
+    if (playlist.size() == 0) return;
+
+    currentIndex = (currentIndex - 1 + playlist.size()) % playlist.size();
+    loadFile(playlist[currentIndex]);
+    start();
+}
+void PlayerAudio::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+    if (source == &transportSource)
+    {
+        if (transportSource.hasStreamFinished())
+        {
+            playNext(); 
+        }
+    }
 }

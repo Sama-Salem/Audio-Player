@@ -8,8 +8,8 @@ using namespace std;
 class PlayerGUI : public juce::Component,
 	public juce::Button::Listener,
 	public juce::Slider::Listener,
-	public juce::Timer
-
+	public juce::Timer,
+	public juce::ListBoxModel
 {
 public:
 	PlayerGUI();
@@ -22,6 +22,13 @@ public:
 	void releaseResources();
 	void moveAudioPosition();
 	void setSpeed(double ratio);
+	int getNumRows() override;
+	void paintListBoxItem(int rowNumber,
+		juce::Graphics& g,
+		int width, int height,
+		bool rowIsSelected) override;
+	void selectedRowsChanged(int lastRowSelected) override;
+	PlayerAudio& getPlayerAudio() { return playerAudio; }
 
 private:
 	PlayerAudio playerAudio;
@@ -41,6 +48,9 @@ private:
 	juce::Label infoLabel;
 	juce::Label timelabel;
 	juce::Slider progressSlider;
+	juce::TextButton playlistButton{ "load playlist" };
+	juce::ListBox playlistBox;
+
 	/*juce::Slider volumeSlider;
 	juce::Slider positionSlider;*/
 	
@@ -58,6 +68,9 @@ private:
 	juce::Slider volumeSlider;
 	std::unique_ptr <juce::FileChooser> fileChooser;
 	void updateMetadataDisplay(const juce::File& file);
+	std::vector<juce::File> playlistFiles;
+	int currentTrackIndex = -1;
+
 	// Event handlers
 	float previousVolume = 0.5f;
 	bool isMuted = false;
