@@ -2,7 +2,7 @@
 
 PlayerGUI::PlayerGUI() {
     // Add buttons
-    for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton , &startButton , &endButton ,&muteUnmuteButton })
+    for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton , &startButton , &endButton ,&muteUnmuteButton ,&loopButton })
     {
         btn->addListener(this);
         addAndMakeVisible(btn);
@@ -17,10 +17,12 @@ PlayerGUI::PlayerGUI() {
     addAndMakeVisible(startButton);
     addAndMakeVisible(endButton);
     addAndMakeVisible(muteUnmuteButton);
+    addAndMakeVisible(loopButton);
     playPauseButton.addListener(this);
     startButton.addListener(this);
     endButton.addListener(this);
     muteUnmuteButton.addListener(this);
+    loopButton.addListener(this);
 }
     
 void PlayerGUI::resized()
@@ -33,6 +35,8 @@ void PlayerGUI::resized()
     restartButton.setBounds(330, y, 60, 40);
     stopButton.setBounds(470, y, 60, 40);
     muteUnmuteButton.setBounds(400, y, 60, 40);
+    loopButton.setBounds(470, y, 60, 40); 
+
     /*prevButton.setBounds(340, y, 80, 40);
     nextButton.setBounds(440, y, 80, 40);*/
 
@@ -92,12 +96,14 @@ void PlayerGUI::buttonClicked(juce::Button* button)
             playerAudio.stop();
 			playPauseButton.setButtonText("play");
             isPlaying = false;
+            stopTimer();
         }
         else
         {
             playerAudio.start();
             playPauseButton.setButtonText("pause");
             isPlaying = true;
+            startTimer(500);
 		}
     }
 
@@ -120,6 +126,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
     {
         playerAudio.stop();
         playerAudio.setPosition(0.0);
+        stopTimer();
     }
     if (button == &muteUnmuteButton) {
         if (!isMuted) {
@@ -135,8 +142,20 @@ void PlayerGUI::buttonClicked(juce::Button* button)
             isMuted = false;
         }
     }
-
+    if (button == &loopButton) {
+        isLooping = !isLooping;
+        loopButton.setButtonText(isLooping ? "Unloop" : "Loop");
+    }
 }
+void PlayerGUI::timerCallback()
+{
+    if (isLooping && playerAudio.getPosition() >= playerAudio.getLength())
+    {
+        playerAudio.setPosition(0.0);
+        playerAudio.start();
+    }
+}
+
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider)
