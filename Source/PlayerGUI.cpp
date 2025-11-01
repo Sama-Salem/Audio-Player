@@ -43,6 +43,10 @@ PlayerGUI::PlayerGUI() {
     moveTime.addItem("60s", 60);
     moveTime.setSelectedId(5);
    
+    infoLabel.setText("No file loaded", juce::dontSendNotification);
+    infoLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+    infoLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(infoLabel);
 }
     
 void PlayerGUI::resized()
@@ -60,6 +64,7 @@ void PlayerGUI::resized()
     moveButton.setBounds(710, y, 60, 40);
     moveDirection.setBounds(780, y, 60, 40);
     moveTime.setBounds(850, y, 60, 40);
+	infoLabel.setBounds(20, 150, getWidth() - 40, 40);
 
     /*prevButton.setBounds(340, y, 80, 40);
     nextButton.setBounds(440, y, 80, 40);*/
@@ -109,6 +114,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
                 auto file = fc.getResult();
                 if (file.existsAsFile()) {
                     playerAudio.loadFile(file);
+                    updateMetadataDisplay(file);
                 }
             });
     }
@@ -213,7 +219,36 @@ void PlayerGUI::buttonClicked(juce::Button* button)
                 ", Time: " + moveTime.getText());
             moveAudioPosition();
         }
+}
 
+void PlayerGUI::updateMetadataDisplay(const juce::File& file)
+{
+    juce::AudioFormatManager formatManager;
+    formatManager.registerBasicFormats();
+
+    if (auto* reader = formatManager.createReaderFor(file))
+    {
+        juce::String title = reader->metadataValues["Title"];
+        juce::String artist = reader->metadataValues["Artist"];
+        double duration = reader->lengthInSamples / reader->sampleRate;
+
+        juce::String info;
+
+        if (title.isNotEmpty() || artist.isNotEmpty())
+        {
+            info << "Title: " << (title.isNotEmpty() ? title : "Unknown")
+                << " | Artist: " << (artist.isNotEmpty() ? artist : "Unknown")
+                << " | Duration: " << juce::String(duration, 2) << " sec";
+        }
+        else
+        {
+            info << "File: " << file.getFileNameWithoutExtension()
+                << " | Duration: " << juce::String(duration, 2) << " sec";
+        }
+
+        infoLabel.setText(info, juce::dontSendNotification);
+        delete reader;
+    }
 }
 
 void PlayerGUI::timerCallback()

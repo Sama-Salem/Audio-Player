@@ -37,6 +37,7 @@ private:
 	juce::TextButton moveButton{ "Move" };
 	juce::ComboBox moveDirection{ "Move_Direction" };
 	juce::ComboBox moveTime{ "Move_Time" };
+	juce::Label infoLabel;
 
 	bool isPlaying = false;
 	bool isLooping = false;
@@ -48,6 +49,7 @@ private:
 	
 	juce::Slider volumeSlider;
 	std::unique_ptr <juce::FileChooser> fileChooser;
+	void updateMetadataDisplay(const juce::File& file);
 	// Event handlers
 	float previousVolume = 0.5f;
 	bool isMuted = false;
