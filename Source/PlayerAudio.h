@@ -13,13 +13,17 @@ public:
 	void start();
 	void stop();
 	void setGain(float gain);
+	void setSpeed(double speed);
 	void setPosition(double pos);
 	double getPosition() const;
 	double getLength() const;
+	
+
 private:
 	juce::AudioFormatManager formatManager;
 	std::unique_ptr <juce::AudioFormatReaderSource> readerSource;
 	juce::AudioTransportSource transportSource;
-
+	std::unique_ptr<juce::ResamplingAudioSource> resamplingSource;;
+	double currentSampleRate = 44100.0;
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerAudio)
 };

@@ -55,6 +55,20 @@ void PlayerAudio::stop() {
 void PlayerAudio::setGain(float gain) {
     transportSource.setGain(gain);
 }
+void PlayerAudio::setSpeed(double speed) {
+        if (readerSource != nullptr)
+        {   bool wasPlaying = transportSource.isPlaying();
+
+            double currentPosition = transportSource.getCurrentPosition();
+            transportSource.stop();
+            transportSource.setSource(nullptr);
+            transportSource.setSource(readerSource.get(), 0, nullptr, currentSampleRate*speed);
+            transportSource.setPosition(currentPosition);
+            if (wasPlaying)
+                transportSource.start();
+        }
+    
+}
 void PlayerAudio::setPosition(double pos) {
     transportSource.setPosition(pos);
 }

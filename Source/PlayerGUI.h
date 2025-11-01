@@ -1,4 +1,4 @@
-﻿#pragma once // PlayerGUI.h
+#pragma once // PlayerGUI.h
 #include <JuceHeader.h>
 #include "PlayerAudio.h"
 
@@ -21,6 +21,7 @@ public:
 	void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
 	void releaseResources();
 	void moveAudioPosition();
+	void setSpeed(double ratio);
 
 private:
 	PlayerAudio playerAudio;
@@ -38,6 +39,12 @@ private:
 	juce::ComboBox moveDirection{ "Move_Direction" };
 	juce::ComboBox moveTime{ "Move_Time" };
 	juce::Label infoLabel;
+	juce::Label timelabel;
+	juce::Slider progressSlider;
+	/*juce::Slider volumeSlider;
+	juce::Slider positionSlider;*/
+	
+
 
 	bool isPlaying = false;
 	bool isLooping = false;
@@ -46,7 +53,8 @@ private:
 	bool isAset = false;
 	bool isBset = false;
 	bool isABLooping = false;
-	
+
+	juce::Slider speedSlider;
 	juce::Slider volumeSlider;
 	std::unique_ptr <juce::FileChooser> fileChooser;
 	void updateMetadataDisplay(const juce::File& file);
@@ -56,5 +64,6 @@ private:
 	void buttonClicked(juce::Button* button) override;
 	void sliderValueChanged(juce::Slider* slider) override;
 	void timerCallback() override;
+	/*bool isPlaying = false; */
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlayerGUI)
 };
