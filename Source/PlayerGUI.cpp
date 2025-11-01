@@ -2,12 +2,11 @@
 
 PlayerGUI::PlayerGUI() {
     // Add buttons
-    for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton , &startButton , &endButton ,&muteUnmuteButton ,&loopButton })
+    for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton , &startButton , &endButton ,&muteUnmuteButton ,&loopButton ,&ABloopButton,&moveButton })
     {
         btn->addListener(this);
         addAndMakeVisible(btn);
     }
-
     // Volume slider
     volumeSlider.setRange(0.0, 1.0, 0.01);
     volumeSlider.setValue(0.5);
@@ -18,11 +17,36 @@ PlayerGUI::PlayerGUI() {
     addAndMakeVisible(endButton);
     addAndMakeVisible(muteUnmuteButton);
     addAndMakeVisible(loopButton);
+    addAndMakeVisible(ABloopButton);
+    addAndMakeVisible(moveButton);
+    addAndMakeVisible(moveDirection);
+    addAndMakeVisible(moveTime);
+
+  
     playPauseButton.addListener(this);
     startButton.addListener(this);
     endButton.addListener(this);
     muteUnmuteButton.addListener(this);
     loopButton.addListener(this);
+    ABloopButton.addListener(this);
+    moveButton.addListener(this);
+    
+
+    moveDirection.addItem("Forward",1);
+    moveDirection.addItem("Back", 2);
+    moveDirection.setSelectedId(1);
+    moveTime.addItem("5s", 5);
+    moveTime.addItem("10s", 10);
+    moveTime.addItem("15s", 15);
+    moveTime.addItem("30s", 30);
+    moveTime.addItem("45s", 45);
+    moveTime.addItem("60s", 60);
+    moveTime.setSelectedId(5);
+   
+    infoLabel.setText("No file loaded", juce::dontSendNotification);
+    infoLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+    infoLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(infoLabel);
 }
     
 void PlayerGUI::resized()
@@ -33,9 +57,14 @@ void PlayerGUI::resized()
     startButton.setBounds(190, y, 60, 40);
     endButton.setBounds(260, y, 60, 40);
     restartButton.setBounds(330, y, 60, 40);
-    stopButton.setBounds(470, y, 60, 40);
     muteUnmuteButton.setBounds(400, y, 60, 40);
-    loopButton.setBounds(470, y, 60, 40); 
+    stopButton.setBounds(470, y, 60, 40);
+    loopButton.setBounds(540, y, 60, 40); 
+    ABloopButton.setBounds(610, y, 100, 40);
+    moveButton.setBounds(710, y, 60, 40);
+    moveDirection.setBounds(780, y, 60, 40);
+    moveTime.setBounds(850, y, 60, 40);
+	infoLabel.setBounds(20, 150, getWidth() - 40, 40);
 
     /*prevButton.setBounds(340, y, 80, 40);
     nextButton.setBounds(440, y, 80, 40);*/
@@ -85,6 +114,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
                 auto file = fc.getResult();
                 if (file.existsAsFile()) {
                     playerAudio.loadFile(file);
+                    updateMetadataDisplay(file);
                 }
             });
     }
@@ -146,16 +176,117 @@ void PlayerGUI::buttonClicked(juce::Button* button)
         isLooping = !isLooping;
         loopButton.setButtonText(isLooping ? "Unloop" : "Loop");
     }
+
+    if (button == &ABloopButton)
+    {
+        if (!isAset)
+        {
+            pointA = playerAudio.getPosition();
+            isAset = true;
+            ABloopButton.setButtonText("Set B");
+    
+            
+        }
+        else if (!isBset)
+        {
+            pointB = playerAudio.getPosition();
+            if (pointB > pointA)
+            {
+                isBset = true;
+                isABLooping = true;
+                ABloopButton.setButtonText("Reset A_B ");
+            }
+            else
+            {
+                pointB = 0.0;
+            }
+        }
+    else
+    {
+        isAset = false;
+        isBset = false;
+        isABLooping = false;
+        pointA = 0.0;
+        pointB = 0.0;
+        ABloopButton.setButtonText("Segment_Loop");
+    }
+
+    }
+
+    if (button == &moveButton)
+        {
+            juce::Logger::outputDebugString("Move pressed - Direction: " + moveDirection.getText() +
+                ", Time: " + moveTime.getText());
+            moveAudioPosition();
+        }
 }
+
+void PlayerGUI::updateMetadataDisplay(const juce::File& file)
+{
+    juce::AudioFormatManager formatManager;
+    formatManager.registerBasicFormats();
+
+    if (auto* reader = formatManager.createReaderFor(file))
+    {
+        juce::String title = reader->metadataValues["Title"];
+        juce::String artist = reader->metadataValues["Artist"];
+        double duration = reader->lengthInSamples / reader->sampleRate;
+
+        juce::String info;
+
+        if (title.isNotEmpty() || artist.isNotEmpty())
+        {
+            info << "Title: " << (title.isNotEmpty() ? title : "Unknown")
+                << " | Artist: " << (artist.isNotEmpty() ? artist : "Unknown")
+                << " | Duration: " << juce::String(duration, 2) << " sec";
+        }
+        else
+        {
+            info << "File: " << file.getFileNameWithoutExtension()
+                << " | Duration: " << juce::String(duration, 2) << " sec";
+        }
+
+        infoLabel.setText(info, juce::dontSendNotification);
+        delete reader;
+    }
+}
+
 void PlayerGUI::timerCallback()
 {
-    if (isLooping && playerAudio.getPosition() >= playerAudio.getLength())
+    double currentPos = playerAudio.getPosition();
+
+    if (isLooping && !isABLooping && currentPos>= playerAudio.getLength())
     {
         playerAudio.setPosition(0.0);
         playerAudio.start();
     }
+    else
+    {
+        if (isABLooping && isAset &&isBset)
+            if (currentPos >= pointB && pointB >pointA)
+            {
+                playerAudio.setPosition(pointA);
+                playerAudio.start();
+                
+            }
+    }
 }
+void PlayerGUI::moveAudioPosition()
+{
+    double currentPos = playerAudio.getPosition();
+    double moveSeconds = moveTime.getSelectedId();
+    double newPos = currentPos;
 
+    if (moveDirection.getSelectedId() == 1) 
+        newPos += moveSeconds;
+    else 
+        newPos -= moveSeconds;
+
+    if (newPos < 0) newPos = 0;
+    if (newPos > playerAudio.getLength())
+        newPos = playerAudio.getLength();
+    playerAudio.setPosition(newPos);
+}
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider)

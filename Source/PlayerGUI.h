@@ -20,6 +20,7 @@ public:
 	void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
 	void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill);
 	void releaseResources();
+	void moveAudioPosition();
 
 private:
 	PlayerAudio playerAudio;
@@ -32,12 +33,23 @@ private:
 	juce::TextButton endButton{"end"};
 	juce::TextButton muteUnmuteButton{ "Mute / Unmute" }; 
 	juce::TextButton loopButton {" Loop "};
+	juce::TextButton ABloopButton{ "Segment_Loop" };
+	juce::TextButton moveButton{ "Move" };
+	juce::ComboBox moveDirection{ "Move_Direction" };
+	juce::ComboBox moveTime{ "Move_Time" };
+	juce::Label infoLabel;
 
 	bool isPlaying = false;
 	bool isLooping = false;
+	double pointA = 0.0;
+	double pointB = 0.0;
+	bool isAset = false;
+	bool isBset = false;
+	bool isABLooping = false;
 	
 	juce::Slider volumeSlider;
 	std::unique_ptr <juce::FileChooser> fileChooser;
+	void updateMetadataDisplay(const juce::File& file);
 	// Event handlers
 	float previousVolume = 0.5f;
 	bool isMuted = false;
