@@ -5,6 +5,19 @@ MainComponent::MainComponent()
 {
     addAndMakeVisible(player1);
     addAndMakeVisible(player2);
+	addAndMakeVisible(mixModeButton);
+	mixModeButton.onClick = [this]() {
+		isMixMode = !isMixMode;
+		mixModeButton.setButtonText(isMixMode ? "Single Mode" : "Mix Mode");
+		mixerSource.removeAllInputs();
+		if (isMixMode) {
+			mixerSource.addInputSource(&player1.getPlayerAudio(), false);
+			mixerSource.addInputSource(&player2.getPlayerAudio(), false);
+		}
+		else {
+			mixerSource.addInputSource(&player2.getPlayerAudio(), false);
+		}
+		};
     setSize(800, 600);
     setAudioChannels(0, 2);
 }
@@ -25,7 +38,6 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
 	mixerSource.getNextAudioBlock(bufferToFill);
-    //player1.getNextAudioBlock(bufferToFill);
 }
 
 void MainComponent::releaseResources()
@@ -42,4 +54,5 @@ void MainComponent::resized()
 	player1.setBounds(area.removeFromTop(halfHeight));
 	area.removeFromTop(10);
 	player2.setBounds(area);
+	mixModeButton.setBounds(10, getHeight() - 40, 100, 30);
 }

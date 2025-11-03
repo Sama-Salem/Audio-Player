@@ -17,5 +17,7 @@ private:
 	PlayerGUI player1;
 	PlayerGUI player2;
 	juce::MixerAudioSource mixerSource;
+	bool isMixMode = false;
+	juce::TextButton mixModeButton{ "Mix Mode" };
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
