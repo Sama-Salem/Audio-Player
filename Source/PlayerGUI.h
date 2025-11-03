@@ -14,7 +14,6 @@ class PlayerGUI : public juce::Component,
 public:
 	PlayerGUI();
 	~PlayerGUI() override;
-	
 	void resized() override;
 	void paint(juce::Graphics& g) override;
 	void prepareToPlay(int samplesPerBlockExpected, double sampleRate);
@@ -29,7 +28,8 @@ public:
 		bool rowIsSelected) override;
 	void selectedRowsChanged(int lastRowSelected) override;
 	PlayerAudio& getPlayerAudio() { return playerAudio; }
-
+	void sliderDragStarted(juce::Slider* slider) override;
+	void sliderDragEnded(juce::Slider* slider) override;
 private:
 	PlayerAudio playerAudio;
 	// GUI elements
@@ -41,21 +41,25 @@ private:
 	juce::TextButton endButton{"end"};
 	juce::TextButton muteUnmuteButton{ "Mute / Unmute" }; 
 	juce::TextButton loopButton {" Loop "};
-	juce::TextButton ABloopButton{ "Segment_Loop" };
+	juce::TextButton ABloopButton{ "Set Start [A]" };
 	juce::TextButton moveButton{ "Move" };
 	juce::ComboBox moveDirection{ "Move_Direction" };
 	juce::ComboBox moveTime{ "Move_Time" };
-	juce::Label infoLabel;
-	juce::Label timelabel;
-	juce::Slider progressSlider;
 	juce::TextButton playlistButton{ "load playlist" };
 	juce::ListBox playlistBox;
-
-	/*juce::Slider volumeSlider;
-	juce::Slider positionSlider;*/
+	juce::Label infoLabel;
+	juce::Label timelabel;
+	juce::Label positionLabel;
+	juce::Label positionTimeLabel;
+	juce::Slider progressSlider;
+	juce::Slider speedSlider;
+	juce::Slider volumeSlider;
+	juce::Slider positionSlider;
+	
+	
 	
 
-
+	//SegmentLoop:
 	bool isPlaying = false;
 	bool isLooping = false;
 	double pointA = 0.0;
@@ -63,9 +67,9 @@ private:
 	bool isAset = false;
 	bool isBset = false;
 	bool isABLooping = false;
+	bool isDraggingPosition = false;
 
-	juce::Slider speedSlider;
-	juce::Slider volumeSlider;
+
 	std::unique_ptr <juce::FileChooser> fileChooser;
 	void updateMetadataDisplay(const juce::File& file);
 	std::vector<juce::File> playlistFiles;
