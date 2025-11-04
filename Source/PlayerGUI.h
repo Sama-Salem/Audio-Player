@@ -12,7 +12,7 @@ class PlayerGUI : public juce::Component,
 	public juce::Slider::Listener,
 	public juce::Timer,
 	public juce::ListBoxModel
-{
+{ 
 public:
 	PlayerGUI();
 	~PlayerGUI() override;

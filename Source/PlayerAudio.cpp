@@ -15,7 +15,7 @@ void PlayerAudio::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 
 void PlayerAudio::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
-    transportSource.getNextAudioBlock(bufferToFill);
+    transportSource.getNextAudioBlock(bufferToFill); 
 }
 
 void PlayerAudio::releaseResources()

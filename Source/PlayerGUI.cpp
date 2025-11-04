@@ -239,7 +239,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
         {
             pointA = playerAudio.getPosition();
             isAset = true;
-            ABloopButton.setButtonText("Set End B");
+            ABloopButton.setButtonText("Set B");
     
             
         }
@@ -250,7 +250,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
             {
                 isBset = true;
                 isABLooping = true;
-                ABloopButton.setButtonText("Reset [A,B] ");
+                ABloopButton.setButtonText("Reset A_B ");
             }
             else
             {
@@ -264,7 +264,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
         isABLooping = false;
         pointA = 0.0;
         pointB = 0.0;
-        ABloopButton.setButtonText("Set Start [A]");
+        ABloopButton.setButtonText("Segment_Loop");
     }
 
     }
@@ -346,25 +346,20 @@ void PlayerGUI::timerCallback()
             double currentPos = playerAudio.getPosition();
             double totalLength = playerAudio.getLength();
             progressSlider.setValue(currentPos / totalLength);
-            if (totalLength > 0.0 && !isDraggingPosition)
-                positionSlider.setValue(currentPos / totalLength, juce::dontSendNotification);
+
             int currentMins = (int)(currentPos / 60);
             int currentSecs = (int)fmod(currentPos, 60);
             int totalMins = (int)(totalLength / 60);
             int totalSecs = (int)fmod(totalLength, 60);
+
             timelabel.setText(
                 juce::String(currentMins) + ":" +
                 juce::String(currentSecs).paddedLeft('0', 2) + " / " +
                 juce::String(totalMins) + ":" +
                 juce::String(totalSecs).paddedLeft('0', 2),
                 juce::dontSendNotification);
-          
-            positionTimeLabel.setText(
-                juce::String::formatted("%02d:%02d", currentMins, currentSecs),
-                juce::dontSendNotification 
-            );
         }
-    //SegmentLoop:
+    
     double currentPos = playerAudio.getPosition();
 
     if (isLooping && !isABLooping && currentPos>= playerAudio.getLength())
@@ -407,33 +402,7 @@ void PlayerGUI::sliderValueChanged(juce::Slider* slider)
         playerAudio.setGain((float)slider->getValue());
     if (slider == &speedSlider)
         playerAudio.setSpeed((double)slider->getValue());
-    if (slider == &positionSlider)
-    {
-        double totalLength = playerAudio.getLength();
-        double newPos = positionSlider.getValue() * totalLength;
-        playerAudio.setPosition(newPos);
-    }
 }
-void PlayerGUI::sliderDragStarted(juce::Slider* slider)
-{
-    if (slider == &positionSlider)
-        isDraggingPosition = true;
-}
-
-void PlayerGUI::sliderDragEnded(juce::Slider* slider)
-{
-    if (slider == &positionSlider)
-    {
-        isDraggingPosition = false;
-
-        double totalLength = playerAudio.getLength();
-        double newPos = positionSlider.getValue() * totalLength;
-        playerAudio.setPosition(newPos);
-    }
-}
-
-
-
 int PlayerGUI::getNumRows()
 {
     return (int)playlistFiles.size();
