@@ -1,5 +1,7 @@
 #include "PlayerGUI.h"
 #include "CustomLookAndFeel.h"
+#include <taglib/fileref.h>
+#include <taglib/tag.h>
 
 //Constructor:
 PlayerGUI::PlayerGUI()
@@ -311,32 +313,34 @@ void PlayerGUI::buttonClicked(juce::Button* button)
 //MetaData:
 void PlayerGUI::updateMetadataDisplay(const juce::File& file)
 {
-    juce::AudioFormatManager formatManager;
-    formatManager.registerBasicFormats();
-
-    if (auto* reader = formatManager.createReaderFor(file))
+    juce::String info;
+    TagLib::FileRef f(file.getFullPathName().toRawUTF8());
+    if (!f.isNull() && f.tag())
     {
-        juce::String title = reader->metadataValues["Title"];
-        juce::String artist = reader->metadataValues["Artist"];
-        double duration = reader->lengthInSamples / reader->sampleRate;
-
-        juce::String info;
+        auto* tag = f.tag();
+        juce::String title = tag->title().toCString(true);
+        juce::String artist = tag->artist().toCString(true);
+        juce::String album = tag->album().toCString(true);
+        int seconds = f.audioProperties() ? f.audioProperties()->length() : 0;
 
         if (title.isNotEmpty() || artist.isNotEmpty())
         {
             info << "Title: " << (title.isNotEmpty() ? title : "Unknown")
                 << " | Artist: " << (artist.isNotEmpty() ? artist : "Unknown")
-                << " | Duration: " << juce::String(duration, 2) << " sec";
+                << " | Duration: " << juce::String(seconds) << " sec";
         }
         else
         {
             info << "File: " << file.getFileNameWithoutExtension()
-                << " | Duration: " << juce::String(duration, 2) << " sec";
+                << " | Duration: " << juce::String(seconds) << " sec";
         }
-
-        infoLabel.setText(info, juce::dontSendNotification);
-        delete reader;
     }
+    else
+    {
+        info << "File: " << file.getFileNameWithoutExtension();
+    }
+
+    infoLabel.setText(info, juce::dontSendNotification);
 }
 //Timer:
 void PlayerGUI::timerCallback()
@@ -402,6 +406,12 @@ void PlayerGUI::sliderValueChanged(juce::Slider* slider)
         playerAudio.setGain((float)slider->getValue());
     if (slider == &speedSlider)
         playerAudio.setSpeed((double)slider->getValue());
+    if (slider == &positionSlider)
+    {
+        double totalLength = playerAudio.getLength();
+        double newPos = positionSlider.getValue() * totalLength;
+        playerAudio.setPosition(newPos);
+    }
 }
 int PlayerGUI::getNumRows()
 {
@@ -432,5 +442,22 @@ void PlayerGUI::selectedRowsChanged(int lastRowSelected)
         playerAudio.loadFile(playlistFiles[currentTrackIndex]);
         updateMetadataDisplay(playlistFiles[currentTrackIndex]);
         playerAudio.start();
+    }
+}
+void PlayerGUI::sliderDragStarted(juce::Slider* slider)
+{
+    if (slider == &positionSlider)
+        isDraggingPosition = true;
+}
+
+void PlayerGUI::sliderDragEnded(juce::Slider* slider)
+{
+    if (slider == &positionSlider)
+    {
+        isDraggingPosition = false;
+
+        double totalLength = playerAudio.getLength();
+        double newPos = positionSlider.getValue() * totalLength;
+        playerAudio.setPosition(newPos);
     }
 }
