@@ -1,6 +1,8 @@
 #pragma once // PlayerGUI.h
 #include <JuceHeader.h>
 #include "PlayerAudio.h"
+#include "CustomLookAndFeel.h"
+
 
 using namespace juce;
 using namespace std;
@@ -56,8 +58,7 @@ private:
 	juce::Slider volumeSlider;
 	juce::Slider positionSlider;
 	
-	
-	
+CustomLookAndFeel customLook;
 
 	//SegmentLoop:
 	bool isPlaying = false;

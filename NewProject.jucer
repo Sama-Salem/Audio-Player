@@ -4,14 +4,18 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="BwNVWL" name="NewProject">
     <GROUP id="{D38D186D-2364-4576-AC35-1F483070B2D0}" name="Source">
+      <FILE id="mvv9m0" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="KTroVL" name="PlayerAudio.h" compile="0" resource="0" file="Source/PlayerAudio.h"/>
       <FILE id="qMe3eI" name="PlayerAudio.cpp" compile="1" resource="0" file="Source/PlayerAudio.cpp"/>
       <FILE id="cYabgS" name="PlayerGUI.h" compile="0" resource="0" file="Source/PlayerGUI.h"/>
       <FILE id="KziLC5" name="PlayerGUI.cpp" compile="1" resource="0" file="Source/PlayerGUI.cpp"/>
-      <FILE id="mvv9m0" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="WcmsFh" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="qpnqnu" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
+      <FILE id="D7opDz" name="CustomLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/CustomLookAndFeel.cpp"/>
+      <FILE id="ryfbUu" name="CustomLookAndFeel.h" compile="0" resource="0"
+            file="Source/CustomLookAndFeel.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

@@ -1,4 +1,4 @@
-﻿#include "MainComponent.h"
+#include "MainComponent.h"
 #include "PlayerGUI.h"
 
 MainComponent::MainComponent()
@@ -6,6 +6,11 @@ MainComponent::MainComponent()
     addAndMakeVisible(player1);
     addAndMakeVisible(player2);
 	addAndMakeVisible(mixModeButton);
+	mixModeButton.setColour(juce::TextButton::buttonColourId, juce::Colours::mediumslateblue);
+	mixModeButton.setColour(juce::TextButton::buttonOnColourId, juce::Colours::green);
+	mixModeButton.setColour(juce::TextButton::textColourOffId, juce::Colours::white);
+	mixModeButton.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+
 	mixModeButton.onClick = [this]() {
 		isMixMode = !isMixMode;
 		mixModeButton.setButtonText(isMixMode ? "Single Mode" : "Mix Mode");
@@ -18,7 +23,7 @@ MainComponent::MainComponent()
 			mixerSource.addInputSource(&player2.getPlayerAudio(), false);
 		}
 		};
-    setSize(800, 600);
+	setSize(1200, 800);
     setAudioChannels(0, 2);
 }
 

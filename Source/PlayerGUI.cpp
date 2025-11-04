@@ -1,124 +1,135 @@
 #include "PlayerGUI.h"
+#include "CustomLookAndFeel.h"
 
-PlayerGUI::PlayerGUI() {
-    // Add buttons
-    for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton , &startButton , &endButton ,&muteUnmuteButton ,&loopButton ,&ABloopButton,&moveButton })
-    {
-        btn->addListener(this);
-        addAndMakeVisible(btn);
+//Constructor:
+PlayerGUI::PlayerGUI()
+{
+    setLookAndFeel(&customLook);
+        for (auto* btn : { &loadButton, &restartButton , &stopButton , &playPauseButton ,
+                           &startButton , &endButton ,&muteUnmuteButton ,&loopButton ,
+                           &ABloopButton ,&moveButton })
+        {
+            btn->addListener(this);
+            addAndMakeVisible(btn);
+        }
+
+        volumeSlider.setRange(0.0, 1.0, 0.01);
+        volumeSlider.setValue(0.5);
+        volumeSlider.addListener(this);
+        addAndMakeVisible(volumeSlider);
+
+        speedSlider.setRange(0.5, 2.0, 0.01);
+        speedSlider.setValue(1.0);
+        speedSlider.addListener(this);
+        addAndMakeVisible(speedSlider);
+
+        progressSlider.setRange(0.0, 1.0);
+        progressSlider.setEnabled(false);
+        addAndMakeVisible(progressSlider);
+
+        positionSlider.setRange(0.0, 1.0);
+        positionSlider.addListener(this);
+        addAndMakeVisible(positionSlider);
+
+        timelabel.setText("0:00 / 0:00", juce::dontSendNotification);
+        timelabel.setJustificationType(juce::Justification::centred);
+        addAndMakeVisible(timelabel);
+
+        addAndMakeVisible(playlistButton);
+        addAndMakeVisible(playlistBox);
+        playlistButton.addListener(this);
+        playlistBox.setModel(this);
+
+        moveDirection.addItem("Forward", 1);
+        moveDirection.addItem("Back", 2);
+        moveDirection.setSelectedId(1);
+        addAndMakeVisible(moveDirection);
+
+        moveTime.addItem("5s", 5);
+        moveTime.addItem("10s", 10);
+        moveTime.addItem("15s", 15);
+        moveTime.addItem("30s", 30);
+        moveTime.addItem("45s", 45);
+        moveTime.addItem("60s", 60);
+        moveTime.setSelectedId(5);
+        addAndMakeVisible(moveTime);
+
+        infoLabel.setText("No file loaded", juce::dontSendNotification);
+        infoLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+        infoLabel.setJustificationType(juce::Justification::centred);
+        addAndMakeVisible(infoLabel);
+
+        startTimerHz(10);
     }
-    // Volume slider:
-    volumeSlider.setRange(0.0, 1.0, 0.01);
-    volumeSlider.setValue(0.5);
-    volumeSlider.addListener(this);
-
-    //MakeVisible:
-    addAndMakeVisible(volumeSlider);
-    addAndMakeVisible(playPauseButton);
-    addAndMakeVisible(startButton);
-    addAndMakeVisible(endButton);
-    addAndMakeVisible(muteUnmuteButton);
-    addAndMakeVisible(loopButton);
-    addAndMakeVisible(ABloopButton);
-    addAndMakeVisible(moveButton);
-    addAndMakeVisible(moveDirection);
-    addAndMakeVisible(moveTime);
-    addAndMakeVisible(playlistButton);
-    addAndMakeVisible(playlistBox);
-    addAndMakeVisible(speedSlider);
-    addAndMakeVisible(progressSlider);
-    addAndMakeVisible(timelabel);
-    addAndMakeVisible(positionSlider);
-    addAndMakeVisible(positionTimeLabel);
-    
-
-
-
-
-    //SpeedSlider:
-    speedSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    speedSlider.setRange(0.5, 2.0, 0.01);
-    speedSlider.setValue(1.0);
-    speedSlider.setEnabled(true);
-    progressSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    progressSlider.setRange(0.0, 1.0);
-    progressSlider.setEnabled(false);
-    timelabel.setText("0:00 / 0:00", juce::dontSendNotification);
-    timelabel.setJustificationType(juce::Justification::centred);
-    startTimerHz(10); 
-
-    //positinSlider:
-    positionSlider.setRange(0.0, 1.0);
-    positionSlider.setSliderStyle(juce::Slider::LinearHorizontal);
-    positionSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    positionTimeLabel.setText("00:00", juce::dontSendNotification);
-    positionTimeLabel.setJustificationType(juce::Justification::centredLeft);
-    startTimerHz(10);
-
-    //AddListener:
-    playPauseButton.addListener(this);
-    startButton.addListener(this);
-    endButton.addListener(this);
-    muteUnmuteButton.addListener(this);
-    loopButton.addListener(this);
-    ABloopButton.addListener(this);
-    moveButton.addListener(this);
-    playlistButton.addListener(this);
-    playlistBox.setModel(this);
-    speedSlider.addListener(this);
-    positionSlider.addListener(this);
-    
-    //moveButton:
-    moveDirection.addItem("Forward",1);
-    moveDirection.addItem("Back", 2);
-    moveDirection.setSelectedId(1);
-    moveTime.addItem("5s", 5);
-    moveTime.addItem("10s", 10);
-    moveTime.addItem("15s", 15);
-    moveTime.addItem("30s", 30);
-    moveTime.addItem("45s", 45);
-    moveTime.addItem("60s", 60);
-    moveTime.setSelectedId(5);
-
-    //infolabel:
-    infoLabel.setText("No file loaded", juce::dontSendNotification);
-    infoLabel.setColour(juce::Label::textColourId, juce::Colours::white);
-    infoLabel.setJustificationType(juce::Justification::centred);
-    addAndMakeVisible(infoLabel);
-}
 //Resize:
 void PlayerGUI::resized()
 {
-    int y = 10;
+    auto area = getLocalBounds().reduced(10);
+    int buttonWidth = 100;
+    int buttonHeight = 30;
+    int spacing = 8;
 
-    loadButton.setBounds(20, y, 100, 30);
-    playPauseButton.setBounds(130, y, 60, 30);
-    startButton.setBounds(200, y, 60, 30);
-    endButton.setBounds(270, y, 60, 30);
-    restartButton.setBounds(340, y, 60, 30);
-    muteUnmuteButton.setBounds(410, y, 60, 30);
-    stopButton.setBounds(480, y, 60, 30);
-    loopButton.setBounds(550, y, 60, 30); 
-    ABloopButton.setBounds(620, y, 100, 30);
-    moveButton.setBounds(730, y, 60, 30);
-    moveDirection.setBounds(800, y, 60, 30);
-    moveTime.setBounds(870, y, 60, 30);
-    volumeSlider.setBounds(20, 50, getWidth() - 40, 20);
-    speedSlider.setBounds(20, 80, getWidth() - 40, 20);
-    progressSlider.setBounds(20, 110, getWidth() - 40, 20);
-    timelabel.setBounds(20, 125, getWidth() - 40, 20);
-    positionSlider.setBounds(60, 140, getWidth() - 40, 20);
-    positionTimeLabel.setBounds(20, 150, getWidth() - 40, 20);
-    playlistButton.setBounds(20, 170, 120, 25);
-    playlistBox.setBounds(150, 180, getWidth() - 180, 100);
-    infoLabel.setBounds(20, 270, getWidth() - 40, 25);
+    juce::Rectangle<int> leftArea = area.removeFromLeft(getWidth() * 0.55f);
+    juce::Rectangle<int> rightArea = area;
 
-    /*prevButton.setBounds(340, y, 80, 40);
-    nextButton.setBounds(440, y, 80, 40);*/   
+    int columnWidth = (leftArea.getWidth() - spacing) / 2;
+
+    juce::Rectangle<int> col1 = leftArea.removeFromLeft(columnWidth);
+    leftArea.removeFromLeft(spacing);
+    juce::Rectangle<int> col2 = leftArea;
+
+    juce::Component* buttons[] = {
+        &loadButton, &playPauseButton, &startButton, &endButton, &restartButton,
+        &muteUnmuteButton, &stopButton, &loopButton, &ABloopButton,
+        &moveButton, &moveDirection, &moveTime, &playlistButton
+    };
+
+    int buttonCount = 0;
+    for (int i = 0; i < (int)(sizeof(buttons) / sizeof(buttons[0])); ++i)
+    {
+        juce::Component* btn = buttons[i];
+        if (buttonCount % 2 == 0)
+        {
+            btn->setBounds(col1.removeFromTop(buttonHeight));
+            col1.removeFromTop(spacing);
+        }
+        else
+        {
+            btn->setBounds(col2.removeFromTop(buttonHeight));
+            col2.removeFromTop(spacing);
+        }
+        buttonCount++;
+    }
+
+    rightArea.removeFromTop(10);
+    playlistBox.setBounds(rightArea.removeFromTop(120));
+    rightArea.removeFromTop(10);
+    volumeSlider.setBounds(rightArea.removeFromTop(20));
+    rightArea.removeFromTop(8);
+    speedSlider.setBounds(rightArea.removeFromTop(20));
+    rightArea.removeFromTop(6);
+    progressSlider.setBounds(rightArea.removeFromTop(20));
+    rightArea.removeFromTop(8);
+    timelabel.setBounds(rightArea.removeFromTop(15));
+    rightArea.removeFromTop(6);
+    positionSlider.setBounds(rightArea.removeFromTop(20));
+    rightArea.removeFromTop(6);
+    infoLabel.setBounds(rightArea.removeFromTop(25));
 }
-PlayerGUI::~PlayerGUI() {
 
-}
+
+    //Paint
+    void PlayerGUI::paint(juce::Graphics & g)
+    {
+        g.fillAll(juce::Colour::fromRGB(85, 90, 100)); 
+        g.setColour(juce::Colours::white);
+        g.drawRect(getLocalBounds(), 2);
+    }
+    PlayerGUI::~PlayerGUI()
+    {
+        setLookAndFeel(nullptr);
+    }
+
 void PlayerGUI::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
     playerAudio.prepareToPlay(samplesPerBlockExpected, sampleRate);
@@ -133,21 +144,8 @@ void PlayerGUI::releaseResources()
 {
     playerAudio.releaseResources();
 }
-void PlayerGUI::paint(juce::Graphics& g)
-{
-        juce::Colour bgColour;
 
-        if (isPlaying)
-            bgColour = juce::Colours::darkgreen;  
-        else
-            bgColour = juce::Colours::darkgrey;   
-
-        g.fillAll(bgColour);
-
-        g.setColour(juce::Colours::white);
-        g.drawRect(getLocalBounds(), 2);
-}
-   
+//Buttons'conditions:
 
 void PlayerGUI::buttonClicked(juce::Button* button)
 {
@@ -310,7 +308,7 @@ void PlayerGUI::buttonClicked(juce::Button* button)
             });
     }
 }
-
+//MetaData:
 void PlayerGUI::updateMetadataDisplay(const juce::File& file)
 {
     juce::AudioFormatManager formatManager;
@@ -340,7 +338,7 @@ void PlayerGUI::updateMetadataDisplay(const juce::File& file)
         delete reader;
     }
 }
-
+//Timer:
 void PlayerGUI::timerCallback()
 {
     if (playerAudio.getLength() > 0)
@@ -385,6 +383,7 @@ void PlayerGUI::timerCallback()
             }
     }
 }
+//Move:
 void PlayerGUI::moveAudioPosition()
 {
     double currentPos = playerAudio.getPosition();
@@ -401,6 +400,7 @@ void PlayerGUI::moveAudioPosition()
         newPos = playerAudio.getLength();
     playerAudio.setPosition(newPos);
 }
+//Sliders'conditions:
 void PlayerGUI::sliderValueChanged(juce::Slider* slider)
 {
     if (slider == &volumeSlider)
@@ -438,20 +438,21 @@ int PlayerGUI::getNumRows()
 {
     return (int)playlistFiles.size();
 }
-
+//PlaylistBox:
 void PlayerGUI::paintListBoxItem(int rowNumber, juce::Graphics& g, int width, int height, bool rowIsSelected)
 {
     if (rowIsSelected)
-        g.fillAll(juce::Colours::lightblue);
+        g.fillAll(juce::Colours::pink);
+    else if (rowNumber == currentTrackIndex)
+        g.fillAll(juce::Colours::darkgreen);
+    else
+        g.fillAll(juce::Colours::black);
+
     g.setColour(juce::Colours::white);
     if (rowNumber < playlistFiles.size())
         g.drawText(playlistFiles[rowNumber].getFileName(),
             5, 0, width, height,
             juce::Justification::centredLeft);
-    if(rowIsSelected)
-		g.fillAll(juce::Colours::lightblue);
-    else if(rowNumber == currentTrackIndex)
-		g.fillAll(juce::Colours::darkgreen);
 }
 
 void PlayerGUI::selectedRowsChanged(int lastRowSelected)
