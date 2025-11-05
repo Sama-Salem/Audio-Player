@@ -24,7 +24,7 @@ It supports playing, pausing, stopping, muting, volume control, speed adjustment
 ## 🧩 How to Run
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Sama-Salem/OOP_Ass2.git
+   git clone https://github.com/Sama-Salem/Audio-Player.git
 
 2. Open the project in Visual Studio.
 
@@ -39,9 +39,9 @@ It supports playing, pausing, stopping, muting, volume control, speed adjustment
 
 ---
 
-## 🎥 Project Demo
+## 🎥 Project Demo & UML-Diagram
 
-[![Watch the video](https://img.icons8.com/ios-filled/500/play-button-circled.png)](https://drive.google.com/drive/u/1/folders/13YUdxORm3xGxtS3tvrC_KTGMZVUUsIdT)
+[![Watch the video & UML](https://img.icons8.com/ios-filled/500/play-button-circled.png)](https://drive.google.com/drive/u/1/folders/13YUdxORm3xGxtS3tvrC_KTGMZVUUsIdT)
 
 ---
 
